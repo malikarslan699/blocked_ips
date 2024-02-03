@@ -1,8 +1,5 @@
-###Python3
 import subprocess
-import json
 import requests
-from datetime import datetime
 
 def get_active_users():
     active_users_output = subprocess.check_output(['who']).decode().split('\n')
@@ -16,37 +13,41 @@ def get_active_users():
             active_users.append((username, login_time, ip_address))
     return active_users
 
-def get_asname(ip_address):
+def get_asname_and_city(ip_address):
     try:
-        response = requests.get(f'http://ip-api.com/json/{ip_address}?fields=asname')
+        response = requests.get(f'http://ip-api.com/json/{ip_address}?fields=asname,city')
         if response.status_code == 200 and response.text.strip():  # Check if response is valid
             data = response.json()
-            return data['asname']
+            asname = data.get('asname', 'Error: No AS name')
+            city = data.get('city', 'Error: No city')
+            return asname, city
         else:
-            return "Error: No data available"
+            return "Error: No data available", "Error: No data available"
     except requests.RequestException:
-        return "Error: Unable to retrieve AS name"
+        return "Error: Unable to retrieve AS name", "Error: Unable to retrieve city"
 
 def main():
     active_users = get_active_users()
     network_counts = {}
     print("Active Users:")
     for username, login_time, ip_address in active_users:
-        asname = get_asname(ip_address)
+        asname, city = get_asname_and_city(ip_address)
         if asname == "EMIRATES-INTERNET":
-            asname = "ETISALAT"
+            asname = "\033[1m\033[32mETISALAT\033[0m"  # Bold and capitalized
+            color = '\033[32m'  # Dark Green
         elif asname == "DU-AS1":
-            asname = "DU"
-        color = '\033[32m' if asname == "ETISALAT" else '\033[35m' if asname == "DU" else '\033[0m'
-        network = "ETISALAT Network" if asname == "ETISALAT" else "DU Network" if asname == "DU" else "Unknown Network"
-        print(f"Username: {username}, {login_time}, IP: {ip_address}, Network: {color}{network}\033[0m")
-        network_counts[network] = network_counts.get(network, 0) + 1
+            asname = "\033[1m\033[35mDU\033[0m"  # Bold and capitalized
+            color = '\033[35m'  # Dark Magenta
+        else:
+            color = '\033[0m'  # Reset color
+        print(f"Username: {username}, {login_time}, IP: {ip_address}, City: {city}, Network: {color}{asname}\033[0m")
+        network_counts[asname] = network_counts.get(asname, 0) + 1
 
     print("\nSummary:")
     total_users = len(active_users)
     print(f"Total Connected users: {total_users}")
     for network, count in network_counts.items():
-        print(f"{network}: {count}")
+        print(f"{network} Network: {count}")
 
 if __name__ == "__main__":
     main()
