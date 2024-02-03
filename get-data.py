@@ -12,6 +12,8 @@ def get_active_users():
             login_time = ' '.join(parts[2:4])  # Modify to use only the third and fourth fields
             ip_address = parts[-1].strip('()')
             active_users.append((username, login_time, ip_address))
+    # Sort the active users by login time
+    active_users.sort(key=lambda x: x[1])  # Sort based on the second element (login_time)
     return active_users
 
 def get_asname_and_city(ip_address):
@@ -30,28 +32,23 @@ def get_asname_and_city(ip_address):
 def main():
     active_users = get_active_users()
     network_counts = {}
-    print("Active Users:")
     for username, login_time, ip_address in active_users:
         asname, city = get_asname_and_city(ip_address)
         if asname == "EMIRATES-INTERNET":
-            asname = "\033[1m\033[32mETISALAT\033[0m"  # Bold and capitalized
+            asname = "\033[1m\033[32mETISALAT\033[0m"  # Bold and Dark Green
             color = '\033[32m'  # Dark Green
         elif asname == "DU-AS1":
-            asname = "\033[1m\033[35mDU\033[0m"  # Bold and capitalized
-            color = '\033[35m'  # Dark Magenta
+            asname = "\033[1m\033[35mDU\033[0m"  # Bold and Magenta
+            color = '\033[35m'  # Magenta
         else:
             color = '\033[0m'  # Reset color
-        # print(f"Username: {username}, {login_time}, IP: {ip_address}, City: {city}, Network: {color}{asname}\033[0m")
         print(f"{username[:8].ljust(8)} | {login_time.ljust(19)} | {ip_address.ljust(15)} | {city.ljust(15)} | {color}{asname}\033[0m")
         network_counts[asname] = network_counts.get(asname, 0) + 1
 
-    print("\nSummary:")
     total_users = len(active_users)
-    print(f"Total Connected users: {total_users}")
     for network, count in network_counts.items():
         print(f"{network} Network: {count}")
 
-  # Include the date command after printing the summary
     subprocess.run(['date'])
 
 if __name__ == "__main__":
