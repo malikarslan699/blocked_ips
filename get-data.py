@@ -40,7 +40,8 @@ def main():
             color = '\033[35m'  # Dark Magenta
         else:
             color = '\033[0m'  # Reset color
-        print(f"Username: {username}, {login_time}, IP: {ip_address}, City: {city}, Network: {color}{asname}\033[0m")
+        # print(f"Username: {username}, {login_time}, IP: {ip_address}, City: {city}, Network: {color}{asname}\033[0m")
+        print(f"{username}, {login_time}, {ip_address}, {city}, {color}{asname}\033[0m")
         network_counts[asname] = network_counts.get(asname, 0) + 1
 
     print("\nSummary:")
