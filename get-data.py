@@ -16,16 +16,18 @@ def get_active_users():
             active_users.append((username, login_time, ip_address))
     return active_users
 
-def get_asname(ip_address):
+def get_asname_and_city(ip_address):
     try:
-        response = requests.get(f'http://ip-api.com/json/{ip_address}?fields=asname')
-        if response.status_code == 200 and response.text.strip():  # Check if response is valid
+        response = requests.get(f'http://ip-api.com/json/{ip_address}?fields=asname,city')
+        if response.status_code == 200 and response.text.strip():
             data = response.json()
-            return data['asname']
+            asname = data.get('asname', 'Unknown AS')
+            city = data.get('city', 'Unknown City')
+            return asname, city
         else:
             return "Error: No data available"
     except requests.RequestException:
-        return "Error: Unable to retrieve AS name"
+        return "Error: Unable to retrieve AS name and city"
 
 def main():
     active_users = get_active_users()
