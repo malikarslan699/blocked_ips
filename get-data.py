@@ -1,4 +1,4 @@
-##Python3
+#Python3
 import subprocess
 import json
 import requests
@@ -21,7 +21,7 @@ def get_asname(ip_address):
         response = requests.get(f'http://ip-api.com/json/{ip_address}?fields=asname')
         if response.status_code == 200 and response.text.strip():  # Check if response is valid
             data = response.json()
-            return data['asname' , 'city']
+            return data['asname']
         else:
             return "Error: No data available"
     except requests.RequestException:
