@@ -1,6 +1,4 @@
-#Python3
 import subprocess
-import json
 import requests
 from datetime import datetime
 
@@ -11,44 +9,28 @@ def get_active_users():
         if line:
             parts = line.split()
             username = parts[0]
-            login_time = ' '.join(parts[2:4])  # Modify to use only the third and fourth fields
+            login_time = ' '.join(parts[2:5])
             ip_address = parts[-1].strip('()')
             active_users.append((username, login_time, ip_address))
     return active_users
 
-def get_asname_and_city(ip_address):
+def get_location(ip_address):
     try:
-        response = requests.get(f'http://ip-api.com/json/{ip_address}?fields=asname,city')
-        if response.status_code == 200 and response.text.strip():
+        response = requests.get(f'http://ip-api.com/json/{ip_address}?fields=city')
+        if response.status_code == 200 and response.text.strip():  
             data = response.json()
-            asname = data.get('asname', 'Unknown AS')
-            city = data.get('city', 'Unknown City')
-            return asname, city
+            return data['city']
         else:
             return "Error: No data available"
     except requests.RequestException:
-        return "Error: Unable to retrieve AS name and city"
+        return "Error: Unable to retrieve city"
 
 def main():
     active_users = get_active_users()
-    network_counts = {}
     print("Active Users:")
     for username, login_time, ip_address in active_users:
-        asname = get_asname(ip_address)
-        if asname == "EMIRATES-INTERNET":
-            asname = "ETISALAT"
-        elif asname == "DU-AS1":
-            asname = "DU"
-        color = '\033[32m' if asname == "ETISALAT" else '\033[35m' if asname == "DU" else '\033[0m'
-        network = "ETISALAT Network" if asname == "ETISALAT" else "DU Network" if asname == "DU" else "Unknown Network"
-        print(f"Username: {username}, {login_time}, IP: {ip_address}, Network: {color}{network}\033[0m")
-        network_counts[network] = network_counts.get(network, 0) + 1
-
-    print("\nSummary:")
-    total_users = len(active_users)
-    print(f"Total Connected users: {total_users}")
-    for network, count in network_counts.items():
-        print(f"{network}: {count}")
+        city = get_location(ip_address)
+        print(f"Username: {username}, Login Time: {login_time}, IP: {ip_address}, City: {city}")
 
 if __name__ == "__main__":
     main()
